@@ -19,8 +19,6 @@ CreateThread(function()
                 SetVehicleUndriveable(vehicle, true)
                 Notification("Your vehicle has flipped over!\nThe engine is damaged.")
                 ShakeGameplayCam("SMALL_EXPLOSION_SHAKE", 1.0)
-                Wait(2000)
-                StopGameplayCamShaking(false)
             end
 
             if not IsEntityUpsidedown(vehicle) and isFlipped then
