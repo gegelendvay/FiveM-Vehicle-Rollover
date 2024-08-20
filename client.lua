@@ -5,7 +5,7 @@ local function CrashNotification()
         {
             id = "car_rollover",
             title = "Vehicle",
-            description = "Your vehicle has flipped over, the engine is damaged!",
+            description = "Your vehicle has crashed, the engine is damaged!",
             position = "center-right",
             duration = 6000,
             style = {
