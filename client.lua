@@ -1,31 +1,66 @@
 local isFlipped = false
 
-local function Notification(text)
-    SetNotificationTextEntry("STRING")
-    AddTextComponentString(text)
-    SetNotificationMessage("CHAR_CALL911", "CHAR_CALL911", true, 1, "Warning!", "~r~Vehicle Accident")
-    DrawNotification(false, false)
+local function CrashNotification()
+    lib.notify(
+        {
+            id = "car_rollover",
+            title = "Vehicle",
+            description = "Your vehicle has flipped over, the engine is damaged!",
+            position = "center-right",
+            duration = 6000,
+            style = {
+                backgroundColor = "#ff963b",
+                color = "#000000",
+                [".description"] = {
+                    color = "#000000"
+                }
+            },
+            icon = "car-burst",
+            iconColor = "#C53030"
+        }
+    )
 end
 
-CreateThread(function()
-    while true do
-        Wait(100)
-        local player = PlayerPedId()
-        local vehicle = GetVehiclePedIsIn(player, false)
-        if vehicle ~= 0 then
-            if IsEntityUpsidedown(vehicle) and not isFlipped then
-                isFlipped = true
-                SetVehicleEngineHealth(vehicle, 300)
-                SetVehicleUndriveable(vehicle, true)
-                Notification("Your vehicle has flipped over!\nThe engine is damaged.")
-                ShakeGameplayCam("SMALL_EXPLOSION_SHAKE", 1.0)
-            end
+local Running = false
+local function RolloverThread()
+    CreateThread(
+        function()
+            while true do
+                Wait(100)
 
-            if not IsEntityUpsidedown(vehicle) and isFlipped then
-                isFlipped = false
+                local vehicle = cache.vehicle
+                if cache.vehicle then
+                    local vehicleFlipped = IsEntityUpsidedown(vehicle)
+                    local vehicleHeight = GetEntityHeightAboveGround(vehicle)
+
+                    if vehicleFlipped and vehicleHeight < 3 and not isFlipped then
+                        isFlipped = true
+                        SetVehicleEngineHealth(vehicle, 300)
+                        SetVehicleUndriveable(vehicle, true)
+                        CrashNotification()
+                        ShakeGameplayCam("SMALL_EXPLOSION_SHAKE", 1.0)
+                    end
+
+                    if not IsEntityUpsidedown(vehicle) and isFlipped then
+                        isFlipped = false
+                    end
+                end
             end
-        else
+        end
+    )
+end
+
+lib.onCache(
+    "vehicle",
+    function(value)
+        if not value then
             isFlipped = false
+            return
+        end
+
+        if not Running then
+            Running = true
+            RolloverThread()
         end
     end
-end)
+)
