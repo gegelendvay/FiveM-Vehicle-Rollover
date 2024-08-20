@@ -25,7 +25,7 @@ local Running = false
 local function RolloverThread()
     CreateThread(
         function()
-            while true do
+            while Running do
                 Wait(100)
 
                 local vehicle = cache.vehicle
@@ -55,6 +55,7 @@ lib.onCache(
     function(value)
         if not value then
             isFlipped = false
+            Running = false
             return
         end
 
